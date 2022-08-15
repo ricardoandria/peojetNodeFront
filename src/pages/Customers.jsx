@@ -24,8 +24,6 @@ const style = {
 };
 
 export default function Customers() {
-  const [client, fetchClient] = useState([]);
-
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -33,6 +31,21 @@ export default function Customers() {
   const [openUpdate, setOpenUpdate] = React.useState(false);
 
   const handleCloseUpd = () => setOpenUpdate(false);
+
+  const [clientData, setClientData] = useState({
+    nom: "",
+    prenom: "",
+    adress: "",
+    numero_phone: "",
+    num_compte: "",
+    solde: "",
+    id_client: 0,
+  });
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setClientData({ ...clientData, [name]: value });
+  };
 
   const [nom, setNom] = useState("");
   const [prenom, setPrenom] = useState("");
@@ -82,25 +95,18 @@ export default function Customers() {
     } else setFilteredData(newfilter);
   };
 
-  const handleOpenUpd = async (id) => {
+  const handleOpenUpd = async (client) => {
     setOpenUpdate(true);
-
-    await axios
-      .get(`http://localhost:7072/API/Banking/client/${id}`)
-      .then((resp) => setClientUpdate(resp.data))
-      .catch((err) => console.log(err));
+    setClientData(client);
   };
 
-  const updateClient = async (id) => {
+  const updateClient = async (event) => {
+    event.preventDefault();
+    const id = clientData.id_client;
+    // remove the id_client from the client data
+    delete clientData.id_client;
     await axios
-      .put(`http://localhost:7072/API/Banking/client/${id}`, {
-        nom,
-        prenom,
-        adress,
-        num_compte,
-        numero_phone,
-        solde,
-      })
+      .put(`http://localhost:7072/API/Banking/client/${id}`, clientData)
       .then((resp) => console.log(resp.data));
   };
 
@@ -265,7 +271,7 @@ export default function Customers() {
                 </Modal>
                 <table>
                   <thead>
-                    <tr className>
+                    <tr>
                       <th>Numero Client</th>
                       <th>Nom</th>
                       <th>Prenom</th>
@@ -276,7 +282,7 @@ export default function Customers() {
                       <th>Action</th>
                     </tr>
                   </thead>
-                  {clientUpdate?.data.map((item, index) => (
+                  {Object.keys(clientData ?? {}).length && (
                     <Modal
                       open={openUpdate}
                       onClose={handleCloseUpd}
@@ -308,8 +314,8 @@ export default function Customers() {
                             name="nom"
                             multiline
                             style={{ width: "50%" }}
-                            onChange={(e) => setNom(e.target.value)}
-                            value={nom}
+                            onChange={handleChange}
+                            value={clientData.nom}
                           />
                           <TextField
                             id="outlined-textarea"
@@ -318,8 +324,8 @@ export default function Customers() {
                             name="prenom"
                             multiline
                             style={{ width: "50%" }}
-                            onChange={(e) => setPrenom(e.target.value)}
-                            value={prenom}
+                            onChange={handleChange}
+                            value={clientData.prenom}
                           />
                         </div>
 
@@ -329,8 +335,8 @@ export default function Customers() {
                           placeholder="Address"
                           name="adress"
                           multiline
-                          onChange={(e) => setAdress(e.target.value)}
-                          value={adress}
+                          onChange={handleChange}
+                          value={clientData.adress}
                         />
                         <div
                           style={{
@@ -347,8 +353,8 @@ export default function Customers() {
                             name="numero_phone"
                             multiline
                             style={{ width: "50%" }}
-                            onChange={(e) => setNumPhone(e.target.value)}
-                            value={numero_phone}
+                            onChange={handleChange}
+                            value={clientData.numero_phone}
                           />
                           <TextField
                             id="outlined-textarea"
@@ -357,8 +363,8 @@ export default function Customers() {
                             multiline
                             name="num_compte"
                             style={{ width: "50%" }}
-                            onChange={(e) => setNumCompte(e.target.value)}
-                            value={num_compte}
+                            onChange={handleChange}
+                            value={clientData.num_compte}
                           />
                         </div>
                         <TextField
@@ -366,9 +372,9 @@ export default function Customers() {
                           label="Debut de Solde"
                           placeholder="Debut de solde"
                           name="solde"
-                          onChange={(e) => setSolde(e.target.value)}
+                          onChange={handleChange}
                           multiline
-                          value={solde}
+                          value={clientData.solde}
                         />
                         <button
                           style={{
@@ -379,17 +385,17 @@ export default function Customers() {
                             color: "white",
                             fontWeight: "600",
                           }}
-                          onClick={() => updateClient(item.id_client)}
+                          onClick={updateClient}
                         >
                           Modifier
                         </button>
                       </Box>
                     </Modal>
-                  ))}
+                  )}
 
                   <tbody>
                     {filteredData.length == 0
-                      ? data?.data.data.map((item, i) => {
+                      ? data.data.data.map((item, i) => {
                           return (
                             <>
                               <tr>
@@ -423,9 +429,7 @@ export default function Customers() {
                                     Delete
                                   </button>
                                   <button
-                                    onClick={() =>
-                                      handleOpenUpd(item.id_client)
-                                    }
+                                    onClick={() => handleOpenUpd(item)}
                                     style={{
                                       padding: "5px 10px",
                                       background: "rgb(37, 150, 190)",
