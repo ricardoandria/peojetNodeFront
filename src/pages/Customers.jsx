@@ -1,16 +1,13 @@
 /* eslint-disable array-callback-return */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import { useAddClient, useCreateClient } from "../hooks/useAddClient";
-import { bgcolor } from "@mui/system";
-import Topnav from "../components/topnav/TopNav";
 
 const style = {
   position: "absolute",
