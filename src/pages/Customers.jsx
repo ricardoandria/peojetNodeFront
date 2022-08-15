@@ -104,21 +104,6 @@ export default function Customers() {
       .then((resp) => console.log(resp.data));
   };
 
-  // const editClient = (e, id) => {
-  //   const urlApi = "http://localhost:7072/API/Banking/client/";
-  //   e.preventDefault();
-  //   var data = {
-  //     nom: nom,
-  //     prenom: prenom,
-  //     adress: adress,
-  //     numero_phone: numero_phone,
-  //     num_compte: num_compte,
-  //     solde: solde,
-  //   };
-  //   axios.put(urlApi / `${id}`);
-  //   console.log(id);
-  // };
-
   return (
     <>
       <div>
