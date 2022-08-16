@@ -4,7 +4,8 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import axios from "axios";
 import { useQuery } from "react-query";
-import { useAddVersement, useCreateVersement } from "../hooks/useAddVersement";
+
+import { useCreateTransaction } from "../hooks/useAddTransaction";
 
 const style = {
   position: "absolute",
@@ -22,7 +23,7 @@ const Transaction = () => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const { mutate } = useAddVersement();
+
   const [filteredData, setFilteredData] = useState([]);
 
   const [num_compte, setNumCompte] = useState("");
@@ -36,57 +37,56 @@ const Transaction = () => {
 
   const handleCloseUpd = () => setOpenUpdate(false);
 
-  const { loading, data, refetch } = useCreateVersement();
+  const { loading, data, refetch } = useCreateTransaction();
 
-  const addNewVersement = async (e) => {
-    e.preventDefault();
-    const versement = {
-      num_compte,
-      id_client,
-      montant_versement,
-      date_versement,
-    };
+  // const addNewVersement = async (e) => {
+  //   e.preventDefault();
+  //   const versement = {
+  //     num_compte,
+  //     id_client,
+  //     montant_versement,
+  //     date_versement,
+  //   };
 
-    mutate(versement);
-    handleClose();
-    refetch();
-  };
+  //   handleClose();
+  //   refetch();
+  // };
 
-  const deleteClient = async (id) => {
-    await axios.delete(`http://localhost:7072/API/Banking/versement/${id}`);
-    refetch();
-  };
+  // const deleteClient = async (id) => {
+  //   await axios.delete(`http://localhost:7072/API/Banking/versement/${id}`);
+  //   refetch();
+  // };
 
-  const handlefilter = (event) => {
-    const searchUser = event.target.value;
-    const newfilter = data.data.data.filter((value) => {
-      return value.num_compte.toLowerCase().includes(searchUser.toLowerCase());
-    });
+  // const handlefilter = (event) => {
+  //   const searchUser = event.target.value;
+  //   const newfilter = data.data.data.filter((value) => {
+  //     return value.num_compte.toLowerCase().includes(searchUser.toLowerCase());
+  //   });
 
-    if (searchUser == "") {
-      setFilteredData(data.data.data);
-    } else setFilteredData(newfilter);
-  };
+  //   if (searchUser == "") {
+  //     setFilteredData(data.data.data);
+  //   } else setFilteredData(newfilter);
+  // };
 
-  const handleOpenUpd = async (id) => {
-    setOpenUpdate(true);
+  // const handleOpenUpd = async (id) => {
+  //   setOpenUpdate(true);
 
-    await axios
-      .get(`http://localhost:7072/API/Banking/versement/${id}`)
-      .then((resp) => setClientUpdate(resp.data))
-      .catch((err) => console.log(err));
-  };
+  //   await axios
+  //     .get(`http://localhost:7072/API/Banking/versement/${id}`)
+  //     .then((resp) => setClientUpdate(resp.data))
+  //     .catch((err) => console.log(err));
+  // };
 
-  const updateVersement = async (id) => {
-    await axios
-      .put(`http://localhost:7072/API/Banking/versement/${id}`, {
-        id_client,
-        num_compte,
-        montant_versement,
-        date_versement,
-      })
-      .then((resp) => console.log(resp.data));
-  };
+  // const updateVersement = async (id) => {
+  //   await axios
+  //     .put(`http://localhost:7072/API/Banking/versement/${id}`, {
+  //       id_client,
+  //       num_compte,
+  //       montant_versement,
+  //       date_versement,
+  //     })
+  //     .then((resp) => console.log(resp.data));
+  // };
 
   return (
     <div>
@@ -187,7 +187,7 @@ const Transaction = () => {
                   color: "white",
                   fontWeight: "600",
                 }}
-                onClick={addNewVersement}
+                // onClick={addNewVersement}
               >
                 Ajouter
               </button>
@@ -197,7 +197,7 @@ const Transaction = () => {
             <input
               type="text"
               placeholder="Recherche..."
-              onChange={handlefilter}
+              // onChange={handlefilter}
             />
             <i className="bx bx-search"></i>
           </div>
@@ -211,12 +211,10 @@ const Transaction = () => {
               <table>
                 <thead>
                   <tr>
-                    <th>Numero versement</th>
-                    <th>Numero client</th>
-                    <th>Numero de compte</th>
-                    <th>Montant</th>
-                    <th>Date </th>
-                    <th>Action</th>
+                    <th style={{ textAlign: "center" }}>Nom</th>
+                    <th style={{ textAlign: "center" }}>Compte</th>
+                    <th style={{ textAlign: "center" }}>Montant</th>
+                    <th style={{ textAlign: "center" }}>Action</th>
                   </tr>
                 </thead>
                 {clientUpdate?.data.map((item, index) => (
@@ -294,7 +292,7 @@ const Transaction = () => {
                           color: "white",
                           fontWeight: "600",
                         }}
-                        onClick={() => updateVersement(item.id_versement)}
+                        // onClick={() => updateVersement(item.id_versement)}
                       >
                         Modifier
                       </button>
@@ -307,36 +305,30 @@ const Transaction = () => {
                         return (
                           <tr>
                             <th style={{ textAlign: "center" }} key={i}>
-                              {item.id_versement}
+                              {item.nom}
                             </th>
-                            <td style={{ textAlign: "center" }}>
-                              {item.id_client}
-                            </td>
                             <td style={{ textAlign: "center" }}>
                               {item.num_compte}
                             </td>
-                            <td>{item.montant_versement} Ar</td>
-                            <td>{item.date_versement}</td>
-                            <td
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "10px",
-                              }}
-                            >
+                            <td style={{ textAlign: "center" }}>
+                              {item.solde}
+                            </td>
+
+                            <td style={{ textAlign: "center" }}>
                               <button
-                                onClick={() => deleteClient(item.id_versement)}
+                                // onClick={() => deleteClient(item.id_versement)}
                                 style={{
                                   padding: "5px 10px",
                                   background: "red",
                                   color: "white",
                                   fontWeight: "600",
+                                  marginRight: "10px",
                                 }}
                               >
                                 Delete
                               </button>
                               <button
-                                onClick={() => handleOpenUpd(item.id_versement)}
+                                // onClick={() => handleOpenUpd(item.id_versement)}
                                 style={{
                                   padding: "5px 10px",
                                   background: "rgb(37, 150, 190)",
