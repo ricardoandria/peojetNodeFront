@@ -58,8 +58,6 @@ export default function Customers() {
 
   const { loading, data, refetch } = useCreateClient();
 
-  const [clientUpdate, setClientUpdate] = useState();
-
   const deleteClient = async (id) => {
     await axios.delete(`http://localhost:7072/API/Banking/client/${id}`);
     refetch();
@@ -87,7 +85,7 @@ export default function Customers() {
       return value.num_compte.toLowerCase().includes(searchUser.toLowerCase());
     });
 
-    if (searchUser == "") {
+    if (searchUser === "") {
       setFilteredData(data.data.data);
     } else setFilteredData(newfilter);
   };
@@ -95,6 +93,7 @@ export default function Customers() {
   const handleOpenUpd = async (client) => {
     setOpenUpdate(true);
     setClientData(client);
+    console.log(data);
   };
 
   const updateClient = async (event) => {
@@ -105,6 +104,8 @@ export default function Customers() {
     await axios
       .put(`http://localhost:7072/API/Banking/client/${id}`, clientData)
       .then((resp) => console.log(resp.data));
+    handleCloseUpd();
+    refetch();
   };
 
   return (
@@ -376,8 +377,8 @@ export default function Customers() {
                   )}
 
                   <tbody>
-                    {filteredData.length == 0
-                      ? data.data.data.map((item, i) => {
+                    {filteredData.length === 0
+                      ? data?.data.data.map((item, i) => {
                           return (
                             <>
                               <tr>

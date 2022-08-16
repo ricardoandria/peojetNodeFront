@@ -36,6 +36,18 @@ const Versement = () => {
 
   const handleCloseUpd = () => setOpenUpdate(false);
 
+  const [clientData, setClientData] = useState({
+    num_compte,
+    id_client,
+    montant_versement,
+    date_versement,
+  });
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setClientData({ ...clientData, [name]: value });
+  };
+
   const { loading, data, refetch } = useCreateVersement();
 
   const addNewVersement = async (e) => {
@@ -45,6 +57,7 @@ const Versement = () => {
       id_client,
       montant_versement,
       date_versement,
+      id_versement: 0,
     };
 
     mutate(versement);
@@ -63,29 +76,26 @@ const Versement = () => {
       return value.num_compte.toLowerCase().includes(searchUser.toLowerCase());
     });
 
-    if (searchUser == "") {
+    if (searchUser === "") {
       setFilteredData(data.data.data);
     } else setFilteredData(newfilter);
   };
 
-  const handleOpenUpd = async (id) => {
+  const handleOpenUpd = async (client) => {
     setOpenUpdate(true);
 
-    await axios
-      .get(`http://localhost:7072/API/Banking/versement/${id}`)
-      .then((resp) => setClientUpdate(resp.data))
-      .catch((err) => console.log(err));
+    setClientData(client);
   };
 
-  const updateVersement = async (id) => {
+  const updateVersement = async (event) => {
+    event.preventDefault();
+    const id = clientData.id_versement;
+    delete clientData.id_versement;
     await axios
-      .put(`http://localhost:7072/API/Banking/versement/${id}`, {
-        id_client,
-        num_compte,
-        montant_versement,
-        date_versement,
-      })
+      .put(`http://localhost:7072/API/Banking/versement/${id}`, clientData)
       .then((resp) => console.log(resp.data));
+    handleCloseUpd();
+    refetch();
   };
 
   return (
@@ -218,7 +228,7 @@ const Versement = () => {
                     <th>Action</th>
                   </tr>
                 </thead>
-                {clientUpdate?.data.map((item, index) => (
+                {Object.keys(clientData ?? {}).length && (
                   <Modal
                     open={openUpdate}
                     onClose={handleCloseUpd}
@@ -250,8 +260,8 @@ const Versement = () => {
                           name="num_compte"
                           multiline
                           style={{ width: "50%" }}
-                          onChange={(e) => setNumCompte(e.target.value)}
-                          value={num_compte}
+                          onChange={handleChange}
+                          value={clientData.num_compte}
                         />
                         <TextField
                           id="outlined-textarea"
@@ -260,8 +270,8 @@ const Versement = () => {
                           name="montant_versement"
                           multiline
                           style={{ width: "50%" }}
-                          onChange={(e) => setMontantVersement(e.target.value)}
-                          value={montant_versement}
+                          onChange={handleChange}
+                          value={clientData.montant_versement}
                         />
                       </div>
 
@@ -271,8 +281,8 @@ const Versement = () => {
                         placeholder="Numero Client"
                         name="id_client"
                         multiline
-                        onChange={(e) => setIdClient(e.target.value)}
-                        value={id_client}
+                        onChange={handleChange}
+                        value={clientData.id_client}
                       />
 
                       <TextField
@@ -280,9 +290,9 @@ const Versement = () => {
                         label="Date de versement"
                         placeholder="date de versement"
                         name="date_versement"
-                        onChange={(e) => setDateVersement(e.target.value)}
+                        onChange={handleChange}
                         multiline
-                        value={date_versement}
+                        value={clientData.date_versement}
                       />
                       <button
                         style={{
@@ -293,13 +303,13 @@ const Versement = () => {
                           color: "white",
                           fontWeight: "600",
                         }}
-                        onClick={() => updateVersement(item.id_versement)}
+                        onClick={updateVersement}
                       >
                         Modifier
                       </button>
                     </Box>
                   </Modal>
-                ))}
+                )}
                 <tbody>
                   {filteredData.length == 0
                     ? data?.data.data.map((item, i) => {
@@ -335,7 +345,7 @@ const Versement = () => {
                                 Delete
                               </button>
                               <button
-                                onClick={() => handleOpenUpd(item.id_versement)}
+                                onClick={() => handleOpenUpd(item)}
                                 style={{
                                   padding: "5px 10px",
                                   background: "rgb(37, 150, 190)",

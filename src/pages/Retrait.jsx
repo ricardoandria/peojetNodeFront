@@ -23,6 +23,11 @@ const Retrait = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [clientUpdate, setClientUpdate] = useState();
 
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setClientData({ ...clientData, [name]: value });
+  };
+
   const { mutate } = useAddRetrait();
 
   const [num_compte, setNumCompte] = useState("");
@@ -31,19 +36,24 @@ const Retrait = () => {
   const [montant_retrait, setMontantRetrait] = useState("");
   const [date_retrait, setDateRetrait] = useState("");
 
+  const [clientData, setClientData] = useState({
+    num_compte,
+    id_client,
+    num_cheque,
+    montant_retrait,
+    date_retrait,
+  });
+
   const { loading, data, refetch } = useCreateRetrait();
 
   const [openUpdate, setOpenUpdate] = React.useState(false);
 
   const handleCloseUpd = () => setOpenUpdate(false);
 
-  const handleOpenUpd = async (id) => {
+  const handleOpenUpd = async (retrait) => {
     setOpenUpdate(true);
 
-    await axios
-      .get(`http://localhost:7072/API/Banking/retrait/${id}`)
-      .then((resp) => setClientUpdate(resp.data))
-      .catch((err) => console.log(err));
+    setClientData(retrait);
   };
 
   const addNewRetrait = async (e) => {
@@ -54,6 +64,7 @@ const Retrait = () => {
       num_cheque,
       montant_retrait,
       date_retrait,
+      id_retrait: 0,
     };
 
     mutate(retrait);
@@ -77,16 +88,15 @@ const Retrait = () => {
     refetch();
   };
 
-  const updateRetrait = async (id) => {
+  const updateRetrait = async (event) => {
+    event.preventDefault();
+    const id = clientData.id_retrait;
+    delete clientData.id_retrait;
     await axios
-      .put(`http://localhost:7072/API/Banking/retrait/${id}`, {
-        id_client,
-        num_compte,
-        num_cheque,
-        montant_retrait,
-        date_retrait,
-      })
+      .put(`http://localhost:7072/API/Banking/retrait/${id}`, clientData)
       .then((resp) => console.log(resp.data));
+    handleCloseUpd();
+    refetch();
   };
 
   return (
@@ -229,7 +239,7 @@ const Retrait = () => {
                     <th>Action</th>
                   </tr>
                 </thead>
-                {clientUpdate?.data.map((item, index) => (
+                {Object.keys(clientData ?? {}).length && (
                   <Modal
                     open={openUpdate}
                     onClose={handleCloseUpd}
@@ -261,8 +271,8 @@ const Retrait = () => {
                           name="num_compte"
                           multiline
                           style={{ width: "50%" }}
-                          onChange={(e) => setNumCompte(e.target.value)}
-                          value={num_compte}
+                          onChange={handleChange}
+                          value={clientData.num_compte}
                         />
                         <TextField
                           id="outlined-textarea"
@@ -271,8 +281,8 @@ const Retrait = () => {
                           name="num_cheque"
                           multiline
                           style={{ width: "50%" }}
-                          onChange={(e) => setNumCheque(e.target.value)}
-                          value={num_cheque}
+                          onChange={handleChange}
+                          value={clientData.num_cheque}
                         />
                       </div>
 
@@ -282,8 +292,8 @@ const Retrait = () => {
                         placeholder="Numero Client"
                         name="id_client"
                         multiline
-                        onChange={(e) => setIdClient(e.target.value)}
-                        value={id_client}
+                        onChange={handleChange}
+                        value={clientData.id_client}
                       />
 
                       <TextField
@@ -291,18 +301,18 @@ const Retrait = () => {
                         label="Date de retrait"
                         placeholder="date de retrait"
                         name="date_retrait"
-                        onChange={(e) => setDateRetrait(e.target.value)}
+                        onChange={handleChange}
                         multiline
-                        value={date_retrait}
+                        value={clientData.date_retrait}
                       />
                       <TextField
                         id="outlined-textarea"
                         label="Montant"
                         placeholder="Montant"
                         name="montant_retrait"
-                        onChange={(e) => setMontantRetrait(e.target.value)}
+                        onChange={handleChange}
                         multiline
-                        value={montant_retrait}
+                        value={clientData.montant_retrait}
                       />
                       <button
                         style={{
@@ -313,13 +323,13 @@ const Retrait = () => {
                           color: "white",
                           fontWeight: "600",
                         }}
-                        onClick={() => updateRetrait(item.id_retrait)}
+                        onClick={updateRetrait}
                       >
                         Modifier
                       </button>
                     </Box>
                   </Modal>
-                ))}
+                )}
                 <tbody>
                   {filteredData.length == 0
                     ? data?.data.data.map((item, i) => {
@@ -358,7 +368,7 @@ const Retrait = () => {
                                 Delete
                               </button>
                               <button
-                                onClick={() => handleOpenUpd(item.id_retrait)}
+                                onClick={() => handleOpenUpd(item)}
                                 style={{
                                   padding: "5px 10px",
                                   background: "rgb(37, 150, 190)",
